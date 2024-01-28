@@ -1,20 +1,24 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from django.contrib.auth import authenticate, login as loginUser
+from django.contrib.auth import authenticate, login as loginUser , logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from tasks.forms import TasksForm
 from tasks.models import Tasks
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
+@login_required(login_url='login')
 def home(request):
-    form=TasksForm
-    tasks = Tasks.objects.all()
-    context={
-         "form":form,
-         "tasks":tasks
-    }
-    return render(request, 'index.html', context)
+        if request.user.is_authenticated:
+            user = request.user
+            form=TasksForm()
+            tasks = Tasks.objects.filter(user = user)
+            context={
+                "form":form,
+                "tasks":tasks
+            }
+            return render(request, 'index.html', context)
 
 def login(request):
      if request.method == 'GET':
@@ -75,7 +79,7 @@ def signup(request):
               
               return render(request, 'signup.html', context)
               
-
+@login_required(login_url='login')
 def add_task(request):
     if request.user.is_authenticated:
         user = request.user
@@ -88,4 +92,20 @@ def add_task(request):
         else:
             return render(request, 'index.html', context={'form':form} )
 
-    
+
+def delete_task(request, id):
+     Tasks.objects.get(pk = id).delete()
+     return redirect('home')
+
+
+def change_task(request, id, status):
+        task= Tasks.objects.get(pk=id)
+        task.status=status
+        task.save()
+        return redirect('home')
+
+
+def signout(request):
+     logout(request)
+     return redirect('login')
+

@@ -15,8 +15,22 @@
           </form>
         </div>
       </div>
+
       <div class="col">
         <div class="border">
+          {% if tasks|length == 0 %}
+
+          <div class="p-4">
+            <br />
+            <br />
+            <div class="alert alert-info text-center">
+              <p class="" style="font-size: 30px">NO Tasks</p>
+            </div>
+            <br />
+            <br />
+          </div>
+
+          {% else %}
           <div>
             <table class="table">
               <thead>
@@ -27,6 +41,7 @@
                   <th>Status</th>
                   <th>Priority</th>
                   <th>Due Date</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -38,11 +53,29 @@
                   <td>{{ task.status }}</td>
                   <td>{{ task.priority }}</td>
                   <td>{{ task.due_date }}</td>
+                  <td>
+                    <div class="btn-group">
+                      <a href="delete-task/{{ task.id }}" class="btn btn-sm btn-danger">
+                        delete
+                      </a>
+
+                      {% if task.status == 'P' %}
+                      <a href="change-status/{{ task.id }}/C" class="btn btn-sm btn-success">
+                        complete
+                      </a>
+                      {% else %}
+                      <a href="change-status/{{ task.id }}/P" class="btn btn-sm btn-warning">
+                        pending
+                      </a>
+                      {% endif %}
+                    </div>
+                  </td>
                 </tr>
                 {% endfor %}
               </tbody>
             </table>
           </div>
+          {% endif %}
         </div>
       </div>
     </div>
