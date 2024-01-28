@@ -2,11 +2,19 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login as loginUser
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from tasks.forms import TasksForm
+from tasks.models import Tasks
 
 # Create your views here.
 
 def home(request):
-    return render(request, 'index.html')
+    form=TasksForm
+    tasks = Tasks.objects.all()
+    context={
+         "form":form,
+         "tasks":tasks
+    }
+    return render(request, 'index.html', context)
 
 def login(request):
      if request.method == 'GET':
@@ -68,7 +76,16 @@ def signup(request):
               return render(request, 'signup.html', context)
               
 
-
-
+def add_task(request):
+    if request.user.is_authenticated:
+        user = request.user
+        form=TasksForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.user=user
+            task.save()
+            return redirect('home')
+        else:
+            return render(request, 'index.html', context={'form':form} )
 
     
